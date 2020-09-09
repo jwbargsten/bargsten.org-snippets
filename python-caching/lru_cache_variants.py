@@ -90,6 +90,9 @@ def add_ttl(cache, ttl=3600):
             ttl_hash = int(time.time() - start_time) // ttl
             return cached_ttl_func(ttl_hash, *args, **kwargs)
 
+        wrapped_func.cache_info = cached_ttl_func.cache_info
+        wrapped_func.cache_clear = cached_ttl_func.cache_clear
+
         return wrapped_func
 
     return decorator
@@ -113,6 +116,7 @@ assert ttl_blah(1, 2) == 3
 assert ttl_ncalls == 1
 assert ttl_blah(1, 2) == 3
 assert ttl_ncalls == 1
+assert ttl_blah.cache_info().currsize == 1
 assert ttl_blah(2, 2) == 4
 assert ttl_ncalls == 2
 assert ttl_blah(3, 2) == 5
