@@ -20,12 +20,14 @@ def omit_self(cache):
         # 2. wrapped_func monkey-patches self to use cached_self_less_func
         # 3. cached_self_less_func is used from now on
 
+        @functools.wraps(func)
         def wrapped_func(self, *args, **kwargs):
 
             # create a weak ref. If we would use a strong reference (aka self), the
             # instance never would die
             self_weak = weakref.ref(self)
 
+            @functools.wraps(func)
             def self_less_func(*args, **kwargs):
                 return func(self_weak(), *args, **kwargs)
 
@@ -83,6 +85,7 @@ def add_ttl(cache, ttl=3600):
 
         cached_ttl_func = cache(ttl_func)
 
+        @functools.wraps(func)
         def wrapped_func(*args, **kwargs):
             ttl_hash = int(time.time() - start_time) // ttl
             return cached_ttl_func(ttl_hash, *args, **kwargs)
